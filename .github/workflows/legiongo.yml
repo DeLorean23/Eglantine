@@ -71,6 +71,7 @@ jobs:
           -DENABLE_UPDATE_CHECKER=OFF
           -DUSE_DISCORD_PRESENCE=OFF
           -DYUZU_LEGION_GO=ON
+          -DENABLE_QT_TRANSLATION=ON
           -DENABLE_LTO=${{ (github.event_name == 'push' || inputs.lto) && 'ON' || 'OFF' }}
 
       - name: Build
@@ -85,7 +86,7 @@ jobs:
               throw "build/release/bin/$exe was not produced"
             }
           }
-          windeployqt --release --no-translations build/release/bin/eglantine.exe
+          windeployqt --release --translations de build/release/bin/eglantine.exe
 
       - name: Upload Windows binary
         uses: actions/upload-artifact@v7

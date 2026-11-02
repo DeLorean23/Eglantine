@@ -72,11 +72,13 @@
 #include <QCheckBox>
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QCoreApplication>
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QInputDialog>
+#include <QLocale>
 #include <QMimeData>
 #include <QPalette>
 #include <QProgressDialog>
@@ -4927,6 +4929,20 @@ void MainWindow::LoadTranslation() {
         qApp->installTranslator(&translator);
     else
         UISettings::values.language = std::string("en");
+
+    // Qt's own strings (OK, Cancel, Yes, No, file dialogs) come from qtbase_*.qm, which
+    // windeployqt places in the translations folder next to the executable.
+    qApp->removeTranslator(&qt_translator);
+    const QString language = QString::fromStdString(UISettings::values.language.GetValue());
+    if (language != QStringLiteral("en")) {
+        const QLocale locale = language.isEmpty() ? QLocale() : QLocale(language);
+        const QString qt_dir = QCoreApplication::applicationDirPath() + QStringLiteral("/translations");
+        // windeployqt merges the modules into qt_<lang>.qm; qtbase_<lang>.qm is the fallback.
+        if (qt_translator.load(locale, QStringLiteral("qt"), QStringLiteral("_"), qt_dir) ||
+            qt_translator.load(locale, QStringLiteral("qtbase"), QStringLiteral("_"), qt_dir)) {
+            qApp->installTranslator(&qt_translator);
+        }
+    }
 }
 
 void MainWindow::OnLanguageChanged(const QString& locale) {

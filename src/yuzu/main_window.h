@@ -570,6 +570,7 @@ private:
     HotkeyRegistry hotkey_registry;
 
     QTranslator translator;
+    QTranslator qt_translator; ///< Qt's own strings (OK, Cancel, file dialogs)
 
     // Install progress dialog
     QProgressDialog* install_progress = nullptr;
