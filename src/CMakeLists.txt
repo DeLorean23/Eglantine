@@ -140,8 +140,15 @@ if (MSVC AND NOT CXX_CLANG)
         )
     endif()
 
+    # Legion Go (Ryzen Z1 Extreme, Zen 4): AVX2 code and no Intel-only JCC padding.
+    option(YUZU_LEGION_GO "MSVC build tuned for Lenovo Legion Go (AVX2, AMD CPU)" OFF)
+
     if (ARCHITECTURE_x86_64)
-        add_compile_options(/QIntel-jcc-erratum)
+        if (YUZU_LEGION_GO)
+            add_compile_options(/arch:AVX2)
+        else()
+            add_compile_options(/QIntel-jcc-erratum)
+        endif()
     endif()
 
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG   "/DEBUG /MANIFEST:NO" CACHE STRING "" FORCE)
