@@ -1,0 +1,40 @@
+name: lupdate-de
+
+# Bringt dist/languages/de.ts auf den Stand des Quellcodes (neue Texte kommen als "unfinished" dazu)
+# und lädt das Ergebnis auf denselben Zweig hoch.
+
+on:
+  push:
+    branches:
+      - de-lupdate
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lupdate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Install Qt linguist tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qt6-l10n-tools
+
+      - name: Run lupdate
+        run: |
+          /usr/lib/qt6/bin/lupdate -version
+          cd dist/languages
+          /usr/lib/qt6/bin/lupdate -recursive -source-language en_US -target-language de \
+            ../../src/yuzu ../../src/qt_common -ts de.ts
+
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/languages/de.ts
+          git commit -m "de.ts: lupdate" || echo "nothing to commit"
+          git push
